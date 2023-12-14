@@ -1,0 +1,78 @@
+:root {
+    --primary-color: #4a4e69;
+    --secondary-color: #9a8c98;
+    --background-color: #f2e9e4;
+    --text-color: #22223b;
+    --button-bg-color: #c9ada7;
+    --button-text-color: #22223b;
+}
+
+[data-theme="dark"] {
+    --primary-color: #22223b;
+    --secondary-color: #4a4e69;
+    --background-color: #2a2d34;
+    --text-color: #f2e9e4;
+    --button-bg-color: #6b705c;
+    --button-text-color: #f2e9e4;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    text-align: center;
+    padding: 20px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.container {
+    background-color: var(--secondary-color);
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: auto;
+    width: 80%;
+}
+
+#data-display {
+    margin-top: 20px;
+}
+
+.forex-data {
+    background-color: var(--button-bg-color);
+    border: 1px solid var(--primary-color);
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 20px;
+    text-align: left;
+}
+
+.forex-data div {
+    margin: 5px 0;
+}
+
+#mode-toggle {
+    background-color: var(--button-bg-color);
+    color: var(--button-text-color);
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: background-color 0.3s, color 0.3s;
+
+}
+
+/* Style the data display area */
+#data-display {
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    background-color: #f7f7f7;
+}
+
+/* Style the Forex data */
+#forex-data {
+    font-size: 18px;
+    margin-top: 10px;
+}

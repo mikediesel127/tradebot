@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forex Trading Bot</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+</head>
+<body class="light-mode">
+    <div class="container">
+        <h1>Forex Trading Bot</h1>
+        <button id="mode-toggle">Toggle Dark/Light Mode</button>
+        
+        <!-- Central Search Bar -->
+ <div class="search-container">
+        <input type="text" id="search-input" placeholder="Search currencies...">
+        <ul id="suggestions-list"></ul>
+    </div>
+        
+        <!-- Data Source Selection -->
+        <div>
+            <label for="dataSource">Select Data Source:</label>
+            <select id="dataSource">
+                <option value="alphaVantage">Alpha Vantage</option>
+                <option value="exchangeRateApi">ExchangeRate-API</option>
+                <option value="fixerIo">Fixer.io</option>
+            </select>
+        </div>
+
+<div id="data-display">
+    <h2>Forex Trading Data</h2>
+    <div id="forex-data">
+        <!-- Forex data will be displayed here -->
+    </div>
+</div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
