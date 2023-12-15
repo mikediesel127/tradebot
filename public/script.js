@@ -1,78 +1,127 @@
 $(document).ready(function() {
-    function fetchData() {
-        const selectedSource = $('#dataSource').val();
-        $.get('/forex', { source: selectedSource }, function(data) {
-            $('#data-display').html(formatForexData(data));
-        }).fail(function() {
-            $('#data-display').html('Failed to fetch data');
-        });
+    const $currencySelect = $('#currency-select');
+    const $exchangeRateDisplay = $('#exchange-rate-display');
+    const $spinner = $('.spinner');
+
+    function showSpinner(show) {
+        if (show) $spinner.show();
+        else $spinner.hide();
     }
 
-    function formatForexData(data) {
-        if (!data || typeof data !== 'object') {
-            return 'No valid data available';
-        }
-        // Formatting logic
-        return htmlContent;
-    }
-
-    $('#dataSource').change(fetchData);
-    fetchData(); // Initial fetch
-
-    function formatForexData(data) {
-        if (!data) {
-            return 'No data available';
-        }
-
-        let htmlContent = '<div class="forex-data">';
-        htmlContent += `<div><strong>From:</strong> ${data.fromCurrency}</div>`;
-        htmlContent += `<div><strong>To:</strong> ${data.toCurrency}</div>`;
-        htmlContent += `<div><strong>Exchange Rate:</strong> ${data.exchangeRate}</div>`;
-        htmlContent += `<div><strong>Last Refreshed:</strong> ${data.timestamp}</div>`;
-        if (data.bidPrice) {
-            htmlContent += `<div><strong>Bid Price:</strong> ${data.bidPrice}</div>`;
-        }
-        if (data.askPrice) {
-            htmlContent += `<div><strong>Ask Price:</strong> ${data.askPrice}</div>`;
-        }
-        htmlContent += '</div>';
-        return htmlContent;
-    }
-
-    $('#dataSource').change(fetchData);
-    fetchData(); // Initial fetch
-
-    
-
-    // Dark Mode Toggle
-    $('#mode-toggle').click(function() {
-        $('body').toggleClass('dark-mode');
-        if ($('body').hasClass('dark-mode')) {
-            $('body').attr('data-theme', 'dark');
-        } else {
-            $('body').attr('data-theme', 'light');
-        }
+    $.get('/api/currencies', function(currencies) {
+        $currencySelect.append(currencies.map(currency => $('<option>', {
+            value: currency,
+            text: currency
+        })));
     });
 
+$currencySelect.on('change', function() {
+    const selectedCurrency = $(this).val();
+    $exchangeRateDisplay.empty();
+    showSpinner(true);
 
-    $('#search-input').on('keyup', function () {
-        const query = $(this).val();
-console.log('keyup');
-        // Make an AJAX request to fetch Forex data based on the search query
-        $.get(`/forex/search?q=${query}`, function (data) {
-            // Update the UI with the search results
-            $('#forex-data').html(data);
+    $.get(`/api/rates/${selectedCurrency}`, function(data) {
+        showSpinner(false);
+
+        const chartData = {
+            labels: Object.keys(data), // Currency codes
+            values: Object.values(data) // Corresponding rates
+        };
+
+        $.each(data, function(currency, rate) {
+            const tooltip = $('<span>').addClass('tooltip').text('Info');
+            $exchangeRateDisplay.append(
+                $('<div>').addClass('grid-item').html(`<strong>${currency}:</strong> ${rate}`)
+                          .append(tooltip)
+            );
         });
-    });
 
-// Handle suggestion click
-$('.suggestions').on('click', '.suggestion', function() {
-    const selectedCurrency = $(this).text();
-    $('#currency-search').val(selectedCurrency);
-    $('.suggestions').empty();
-    // Fetch and display data for the selected currency
-    // Implement this part in your script.js
+        initChart(chartData); // Call initChart with properly formatted data
+    }).fail(function() {
+        showSpinner(false);
+        $exchangeRateDisplay.html('<p>Error loading data</p>');
+    });
 });
+
+
+        const $chartContainer = $('#exchangeRateChart');
+
+    function initChart(data) {
+        const chart = new Chart($chartContainer, {
+            type: 'line',
+            data: {
+                labels: data.labels, // Array of labels e.g., ['Jan', 'Feb', 'Mar']
+                datasets: [{
+                    label: 'Exchange Rate',
+                    data: data.values, // Array of data points e.g., [10, 20, 30]
+                    backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                    borderColor: 'rgba(0, 123, 255, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    const $historicalDataChartCanvas = $('#historicalDataChart');
+
+    // Function to initialize the historical chart
+    function initHistoricalChart(historicalData) {
+        const ctx = $historicalDataChartCanvas.get(0).getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: historicalData.dates, // Array of dates
+                datasets: [{
+                    label: 'Historical Rates',
+                    data: historicalData.rates, // Array of historical rates
+                    backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                    borderColor: 'rgba(0, 123, 255, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+    }
+
+// Function to fetch and update the historical chart
+
+// Function to update the historical chart
+function updateHistoricalChart(currency, date) {
+    $.get(`/api/historical/${currency}/${date}`, function(historicalData) {
+        // Assuming historicalData contains 'rates', which is an object of currency rates
+        const rates = historicalData.rates;
+        const labels = Object.keys(rates);
+        const data = Object.values(rates);
+
+        initHistoricalChart({ labels: labels, data: data });
+    }).fail(function(error) {
+        console.error('Error fetching historical data:', error);
+    });
+}
+
+$('#historicalDate').on('change', function() {
+    const selectedDate = new Date($(this).val());
+    const year = selectedDate.getFullYear();
+    const month = ('0' + (selectedDate.getMonth() + 1)).slice(-2); // Pad month with leading zero
+    const day = ('0' + selectedDate.getDate()).slice(-2); // Pad day with leading zero
+    const selectedCurrency = $currencySelect.val();
+
+    updateHistoricalChart(selectedCurrency, `${year}-${month}-${day}`);
+});
+
 
 
 
